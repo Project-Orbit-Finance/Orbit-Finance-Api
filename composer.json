@@ -1,0 +1,14 @@
+{
+  "name": "project-orbit/finance-api",
+  "description": "Orbit Finance API",
+  "type": "project",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Orbit\\Finance\\": "app/"
+    }
+  },
+  "require": {
+    "php": "^8.2"
+  }
+}
