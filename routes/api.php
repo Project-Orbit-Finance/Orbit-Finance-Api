@@ -14,4 +14,9 @@ return [
     ['POST', '/auth/reset-password', [AuthController::class, 'resetPassword']],
     ['GET', '/transactions', [TransactionController::class, 'index']],
     ['POST', '/transactions', [TransactionController::class, 'store']],
+    ['GET', '/transactions/{transaction}', [TransactionController::class, 'show']],
+    ['PATCH', '/transactions/{transaction}', [TransactionController::class, 'update']],
+    ['DELETE', '/transactions/{transaction}', [TransactionController::class, 'destroy']],
+    ['PATCH', '/transactions/{transaction}/category', [TransactionController::class, 'updateCategory']],
+    ['GET', '/dashboard/summary', [TransactionController::class, 'summary']],
 ];

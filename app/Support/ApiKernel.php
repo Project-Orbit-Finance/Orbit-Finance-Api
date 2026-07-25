@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace Orbit\Finance\Support;
 
-use Orbit\Finance\Http\Controllers\Auth\AuthController;
-use Orbit\Finance\Http\Requests\Auth\ForgotPasswordRequest;
-use Orbit\Finance\Http\Requests\Auth\LoginRequest;
-use Orbit\Finance\Http\Requests\Auth\RegisterRequest;
-use Orbit\Finance\Http\Requests\Auth\ResetPasswordRequest;
-
 final class ApiKernel
 {
     public function handle(): void
@@ -19,10 +13,11 @@ final class ApiKernel
         $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
         foreach ($routes as [$routeMethod, $routePath, $handler]) {
-            if ($method === $routeMethod && $path === $routePath) {
+            $params = $this->matchRoute($method, $path, $routeMethod, $routePath);
+            if ($params !== null) {
                 $controller = new $handler[0]();
                 $action = $handler[1];
-                $controller->{$action}($this->requestPayload());
+                $controller->{$action}($this->requestPayload($params));
                 return;
             }
         }
@@ -30,14 +25,40 @@ final class ApiKernel
         Http::json(['message' => 'Not Found'], 404);
     }
 
-    private function requestPayload(): array
+    private function requestPayload(array $routeParams = []): array
     {
         $input = file_get_contents('php://input');
-        if (!is_string($input) || $input === '') {
-            return [];
+        $payload = [];
+        if (is_string($input) && $input !== '') {
+            $decoded = json_decode($input, true);
+            $payload = is_array($decoded) ? $decoded : [];
         }
 
-        $decoded = json_decode($input, true);
-        return is_array($decoded) ? $decoded : [];
+        return array_merge($payload, $routeParams);
+    }
+
+    private function matchRoute(string $method, string $path, string $routeMethod, string $routePath): ?array
+    {
+        if ($method !== $routeMethod) {
+            return null;
+        }
+
+        $pattern = preg_replace('#\{[^\}]+\}#', '([^/]+)', $routePath);
+        if (!is_string($pattern)) {
+            return null;
+        }
+
+        $pattern = '#^' . $pattern . '$#';
+        if (!preg_match($pattern, $path, $matches)) {
+            return null;
+        }
+
+        preg_match_all('#\{([^\}]+)\}#', $routePath, $names);
+        $params = [];
+        foreach ($names[1] as $index => $name) {
+            $params[$name] = $matches[$index + 1] ?? null;
+        }
+
+        return $params;
     }
 }

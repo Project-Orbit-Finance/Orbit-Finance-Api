@@ -34,7 +34,9 @@ final class StoreTransactionRequest
             'amount' => (float) $input['amount'],
             'date' => (string) $input['date'],
             'account_id' => isset($input['account_id']) ? (int) $input['account_id'] : null,
+            'account_name' => isset($input['account_name']) ? trim((string) $input['account_name']) : null,
             'category_id' => isset($input['category_id']) ? (int) $input['category_id'] : null,
+            'category_name' => isset($input['category_name']) ? trim((string) $input['category_name']) : null,
             'notes' => isset($input['notes']) ? trim((string) $input['notes']) : null,
         ];
     }
